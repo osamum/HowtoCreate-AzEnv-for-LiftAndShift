@@ -1,3 +1,5 @@
+\[In English\]
+
 # ローカル環境から既存システムを Azure にリフトアンドシフトする際の閉域化環境の構築
 
 ローカル環境やオンプレミス環境に存在する既存システムを Azure にリフトアンドシフトする際は、仮想ネットワークで閉域化された環境を構築することが推奨されます。このハンズオンでは、Azure 上における基本的な閉域化環境の構築手順を紹介します。
@@ -29,6 +31,8 @@
 また、このハンズオンでは触れませんが、この仮想ネットワークに対し、オンプレミス環境から VPN 接続や ExpressRoute 接続を行うことで、オンプレミス環境から Azure 環境への閉域接続を構築することができます。
 
 # 手順
+
+実際のハンズオンは以下のステップごとのリンクをクリックし、リンク先のハンズオン資料の内容に従って作業してください。
 
 1. [**Azure 仮想ネットワークの作成と Jump Box のデプロイ**](https://github.com/osamum/HowtoMake-Az-JumpBox-Env)
 
@@ -62,3 +66,70 @@
 
     もし、コンテナーレジストリも閉域化された環境内に構築したい場合は、別途 [Azure Container Registry (ACR) をデプロイ](https://learn.microsoft.com/azure/container-registry/container-registry-get-started-portal)し、[プライベートリンク](https://learn.microsoft.com/azure/container-registry/container-registry-private-endpoints) を作成して閉域化された環境内からアクセスできるように構成します。その後、ACR 側のネットワーク設定でパブリックネットワークからのアクセスを無効化すれば、閉域化された環境内でのみコンテナイメージを取得できるようになります。
 
+<br>
+
+# Building an Isolated Azure Environment for Lifting and Shifting an Existing System from a Local Environment
+
+When lifting and shifting an existing system from a local or on-premises environment to Azure, we recommend building an environment isolated within a virtual network. This hands-on guide introduces the basic steps for building an isolated environment on Azure.
+
+It also explains how to lift and shift a local virtual machine (VHD or VHDX) to an Azure virtual machine.
+
+![System architecture diagram](./img/AzClosedEnv_system_archtecture.png)
+
+# Overview
+
+In this hands-on guide, you will use Azure Virtual Network to create an isolated environment and deploy a jump box (bastion server) within it. You will also learn how to lift and shift a local virtual machine to an Azure virtual machine and deploy an Azure Kubernetes Service (AKS) private cluster in the isolated environment.
+
+The actual procedures are divided into separate hands-on guides for each part. This repository serves as a portal to those guides.
+
+# Prerequisites
+
+Before starting, make sure that you meet the following prerequisites:
+
+- You have an active Azure subscription.
+- You can access the Azure portal.
+- You have the Owner or Contributor role in Azure.
+
+# Environment Built in This Guide
+
+A jump box (bastion server), an Azure virtual machine lifted and shifted from a local environment, and an AKS private cluster will be deployed in a single virtual network.
+
+Azure resources in the virtual network can be accessed and managed only from the jump box desktop through Azure Bastion, providing a highly secure, isolated network environment.
+
+Although this hands-on guide does not cover the configuration, you can establish private connectivity from an on-premises environment to Azure by connecting the on-premises environment to this virtual network through a VPN or Azure ExpressRoute.
+
+# Instructions
+
+For each part of the hands-on exercise, select the corresponding link below and follow the instructions in the linked guide.
+
+1. [**Create an Azure Virtual Network and Deploy a Jump Box**](https://github.com/osamum/HowtoMake-Az-JumpBox-Env)
+
+    Create the Azure virtual network that will host the migrated environment, and deploy a jump box (bastion server) in the virtual network.
+
+    ![Jump box system architecture diagram](./img/jumpbox_system_archtecture.png)
+
+    This hands-on guide assumes that all Azure resources are deployed in the same region, so it uses a single virtual network. If you build an environment spanning multiple regions, create a virtual network in each region, connect them by using [virtual network peering](https://learn.microsoft.com/azure/virtual-network/virtual-network-peering-overview), and configure [virtual network links](https://learn.microsoft.com/azure/dns/private-dns-virtual-network-links) to ensure that names are resolved correctly.
+
+2. [**Prepare a Local Virtual Machine (VHDX) for Migration to Azure**](https://github.com/osamum/Az_uploadPrep_vhd)
+
+    In this step, you will prepare a local virtual machine file (VHD or VHDX) to lift and shift it to an Azure virtual machine.
+
+    The guide assumes that you already have a virtual machine file to use. If you do not have one and are following the guide for learning purposes, you can create a Windows development environment virtual machine with [**Hyper-V Quick Create**](https://learn.microsoft.com/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v) and obtain its virtual machine file. However, the password for the default user configured on this virtual machine is not publicly available. Before proceeding, create a separate local account with administrator privileges.
+
+    ![Hyper-V Quick Create](./img/Hyper-V-quick.png)
+
+3. [**Upload a VHD File to Azure and Use It to Create a Virtual Machine in an Isolated Virtual Network**](https://github.com/osamum/Howto-upload-VHD-to-Azure-and-create-VM-)
+
+    Upload the VHD file prepared in step 2 to Azure, and use it to create a virtual machine in the isolated virtual network. Access the deployed virtual machine from the jump box desktop by using RDP.
+
+    ![Uploading a VHD file to Azure](img/VM_from_vhd_system_archtecture.png)
+
+4. [**Deploy Azure Kubernetes Service (AKS) in an Isolated Azure Virtual Network**](https://github.com/osamum/HowtoDeploy_AKS_PrivateCluster)
+
+    Deploy an AKS private cluster in the virtual network. Because an AKS private cluster's API server is accessed through a private IP address in the virtual network, it cannot be accessed over the internet. Manage the AKS private cluster from the jump box desktop.
+
+    The cluster can still connect to the internet. In this hands-on guide, you will deploy an application by using the container image for an AKS demo application stored in GitHub Container Registry (GHCR).
+
+    ![Deploying AKS in an isolated environment](img/Private_AKS_SystemArchtecture.png)
+
+    To deploy a container registry within the isolated environment as well, separately [deploy Azure Container Registry (ACR)](https://learn.microsoft.com/azure/container-registry/container-registry-get-started-portal) and create a [private link](https://learn.microsoft.com/azure/container-registry/container-registry-private-endpoints) so that it can be accessed from the isolated environment. Then disable public network access in the ACR network settings so that container images can be pulled only from within the isolated environment.

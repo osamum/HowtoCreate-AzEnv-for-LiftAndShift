@@ -1,4 +1,4 @@
-\[In English\]
+\[[In English](#building-an-isolated-azure-environment-for-lifting-and-shifting-an-existing-system-from-a-local-environment)\]
 
 # ローカル環境から既存システムを Azure にリフトアンドシフトする際の閉域化環境の構築
 
